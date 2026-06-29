@@ -1,0 +1,6 @@
+{
+  "name": "Dhaqan Suge",
+  "description": "Dhaqanka soomaalida ee suban & farshaxan - Somali cultural heritage preservation and discovery app.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

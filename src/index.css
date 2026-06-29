@@ -1,0 +1,50 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  
+  /* Primary brand colors based on refined Design guidelines */
+  --color-brand-bg: #F7F3EE;
+  --color-brand-primary: #5D3C1E;
+  --color-brand-dark: #1C1410;
+  --color-brand-accent: #EDE0CE;
+  --color-brand-light-cream: #f8ebe6;
+  --color-brand-border: #d7c2b8;
+  --color-brand-secondary-text: #52443c;
+  --color-brand-muted-brown: #835331;
+}
+
+/* Custom styles and utilities */
+body {
+  background-color: #F7F3EE;
+  font-family: "Inter", sans-serif;
+  color: #1C1410;
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.bg-concentric {
+  background-image: repeating-radial-gradient(
+    circle at center,
+    transparent 0,
+    transparent 40px,
+    rgba(93, 60, 30, 0.05) 40px,
+    rgba(93, 60, 30, 0.05) 41px
+  );
+}
+
+.material-symbols-outlined {
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+  font-size: 24px;
+}
+.material-symbols-outlined.fill {
+  font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+

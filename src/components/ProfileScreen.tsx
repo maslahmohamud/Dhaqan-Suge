@@ -9,6 +9,7 @@ interface ProfileScreenProps {
   onLogout: () => void;
   onBackToHome: () => void;
   onUpdateProfile: (updated: Partial<UserProfile>) => void;
+  onUploadAvatar?: (file: File) => Promise<void>;
   onSelectArtifact: (artifact: Artifact) => void;
   currentLang: Language;
   onLanguageChange: (lang: Language) => void;
@@ -25,6 +26,7 @@ export default function ProfileScreen({
   onLogout,
   onBackToHome,
   onUpdateProfile,
+  onUploadAvatar,
   onSelectArtifact,
   currentLang,
   onLanguageChange,
@@ -36,11 +38,16 @@ export default function ProfileScreen({
   const [isLangOpen, setIsLangOpen] = useState(false);
   const [tempName, setTempName] = useState(profile.username);
   const [saveSuccess, setSaveSuccess] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const unreadCount = notifications.filter((n) => !n.isRead).length;
 
-  const handleAvatarClick = () => fileInputRef.current?.click();
+  const handleAvatarClick = () => {
+    if (!isUploading) {
+      fileInputRef.current?.click();
+    }
+  };
 
   const handleNotificationClick = (notif: NotificationItem) => {
     if (onMarkNotificationRead && !notif.isRead) {
@@ -51,14 +58,26 @@ export default function ProfileScreen({
     }
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    const reader = new FileReader();
-    reader.onload = () => {
-      onUpdateProfile({ avatar_url: reader.result as string });
-    };
-    reader.readAsDataURL(file);
+
+    if (onUploadAvatar) {
+      try {
+        setIsUploading(true);
+        await onUploadAvatar(file);
+      } catch (err) {
+        console.error('Failed to upload avatar:', err);
+      } finally {
+        setIsUploading(false);
+      }
+    } else {
+      const reader = new FileReader();
+      reader.onload = () => {
+        onUpdateProfile({ avatar_url: reader.result as string });
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   const handleSaveSettings = () => {
@@ -98,12 +117,17 @@ export default function ProfileScreen({
               <h1 className="text-xs font-bold uppercase tracking-widest text-[#52443c] mb-6">{translate(currentLang, 'profileTitle')}</h1>
 
               <div className="relative group cursor-pointer mb-4" onClick={handleAvatarClick}>
-                <div className="w-24 h-24 rounded-full bg-white flex items-center justify-center border border-[#d7c2b8] overflow-hidden shadow-sm">
+                <div className="w-24 h-24 rounded-full bg-white flex items-center justify-center border border-[#d7c2b8] overflow-hidden shadow-sm relative">
                   {profile.avatar_url ? (
-                    <img src={profile.avatar_url} alt={profile.username} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                    <img src={profile.avatar_url} alt={profile.username} className={`w-full h-full object-cover ${isUploading ? 'opacity-40' : ''}`} referrerPolicy="no-referrer" />
                   ) : (
                     <div className="w-full h-full bg-[#f8ebe6] flex flex-col items-center justify-center text-[#52443c]/60">
                       <span className="material-symbols-outlined text-4xl fill text-[#5D3C1E]">person</span>
+                    </div>
+                  )}
+                  {isUploading && (
+                    <div className="absolute inset-0 bg-[#F7F3EE]/60 flex items-center justify-center">
+                      <div className="w-6 h-6 border-2 border-[#5D3C1E] border-t-transparent rounded-full animate-spin"></div>
                     </div>
                   )}
                 </div>

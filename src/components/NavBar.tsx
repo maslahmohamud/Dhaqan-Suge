@@ -40,11 +40,7 @@ export default function NavBar({ activeScreen, onScreenChange, currentLang, unre
                   <span className="material-symbols-outlined fill text-[18px] leading-none">
                     {tab.icon}
                   </span>
-                  {tab.id === 'profile' && unreadNotificationsCount > 0 && (
-                    <span className="absolute -top-1.5 -right-2 bg-[#F7F3EE] text-[#5D3C1E] text-[7px] font-bold rounded-full min-w-[13px] h-[13px] flex items-center justify-center px-0.5 border border-[#5D3C1E] animate-pulse">
-                      {unreadNotificationsCount}
-                    </span>
-                  )}
+                  {/* No badge on bottom nav tab per user request */}
                 </div>
                 <span className="text-[8px] font-bold mt-0.5 capitalize leading-none tracking-wide">
                   {translatedLabel}
@@ -56,11 +52,7 @@ export default function NavBar({ activeScreen, onScreenChange, currentLang, unre
                   <span className="material-symbols-outlined text-[18px] leading-none">
                     {tab.icon}
                   </span>
-                  {tab.id === 'profile' && unreadNotificationsCount > 0 && (
-                    <span className="absolute -top-1.5 -right-2 bg-[#5D3C1E] text-[#F7F3EE] text-[7px] font-bold rounded-full min-w-[13px] h-[13px] flex items-center justify-center px-0.5 border border-[#f8ebe6]">
-                      {unreadNotificationsCount}
-                    </span>
-                  )}
+                  {/* No badge on bottom nav tab per user request */}
                 </div>
                 <span className="text-[8px] font-semibold mt-0.5 capitalize leading-none tracking-wide text-[#52443c]/80">
                   {translatedLabel}

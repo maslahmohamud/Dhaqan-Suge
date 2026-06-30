@@ -219,24 +219,67 @@ export default function App() {
   const loadNotifications = async () => {
     if (!profile) return;
 
-    // 1. Get read notification ids for this user
-    const { data: reads } = await supabase
-      .from('user_notification_reads')
-      .select('notification_id')
-      .eq('user_id', profile.id);
+    let readIdsSet = new Set<string>();
+    try {
+      // 1. Get read notification ids for this user
+      const { data: reads, error: readsError } = await supabase
+        .from('user_notification_reads')
+        .select('notification_id')
+        .eq('user_id', profile.id);
 
-    const readIdsSet = new Set((reads || []).map((r: any) => r.notification_id));
+      if (!readsError && reads) {
+        reads.forEach((r: any) => {
+          if (r.notification_id) {
+            readIdsSet.add(r.notification_id);
+          }
+        });
+      } else if (readsError) {
+        console.warn('[Supabase Warning] user_notification_reads fetch failed:', readsError.message);
+      }
+    } catch (err) {
+      console.error('Error fetching user_notification_reads:', err);
+    }
 
-    // 2. Get all notifications with artifact info
-    const { data: notifs } = await supabase
-      .from('notifications')
-      .select('*, artifact:artifact_id(*)')
-      .order('created_at', { ascending: false });
+    let notifsData: any[] = [];
+    try {
+      // 2. Get all notifications with artifact info
+      const { data: notifs, error: jointError } = await supabase
+        .from('notifications')
+        .select('*, artifact:artifact_id(*)')
+        .order('created_at', { ascending: false });
 
-    const mapped: NotificationItem[] = (notifs || []).map((n: any) => ({
-      ...n,
-      isRead: readIdsSet.has(n.id),
-    }));
+      if (jointError) {
+        console.warn('[Supabase Warning] Joint select on notifications failed, trying simple select:', jointError.message);
+        const { data: simpleNotifs, error: simpleError } = await supabase
+          .from('notifications')
+          .select('*')
+          .order('created_at', { ascending: false });
+
+        if (!simpleError && simpleNotifs) {
+          notifsData = simpleNotifs;
+        } else if (simpleError) {
+          console.error('[Supabase Error] Simple select on notifications failed:', simpleError.message);
+        }
+      } else if (notifs) {
+        notifsData = notifs;
+      }
+    } catch (err) {
+      console.error('Error fetching notifications:', err);
+    }
+
+    // 3. Map notifications with read status and fallback artifact resolving from current state
+    const mapped: NotificationItem[] = notifsData.map((n: any) => {
+      let artifact = n.artifact;
+      if (!artifact && n.artifact_id) {
+        // Fallback: look up in the already loaded artifacts list
+        artifact = artifacts.find((a) => a.id === n.artifact_id) || null;
+      }
+      return {
+        ...n,
+        artifact,
+        isRead: readIdsSet.has(n.id),
+      };
+    });
 
     setNotifications(mapped);
     setUnreadCount(mapped.filter((n) => !n.isRead).length);
